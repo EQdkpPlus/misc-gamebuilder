@@ -1,0 +1,986 @@
+<div class="breadcrumb-container">
+	<ul class="breadcrumb">
+		<li><a href="{EQDKP_CONTROLLER_PATH}{SID}" title="{L_home}"><i class="fa fa-home"></i></a></li>
+		<li class="current"><a>Gamebuilder</a></li>
+	</ul>
+	<div class="clear"></div>
+</div>
+
+<div class="infobox infobox-large infobox-blue clearfix">
+		<i class="fa fa-info-circle fa-4x pull-left"></i> This Game-Builder builds the basic GameFiles that are required for EQdkp Plus 2.0. Games build with this Tool are not working with older EQdkp Plus Versions.
+</div>
+ 
+ <div class="container theme-showcase" id="optionContainer">
+	<div class="infobox">
+	<div style="width: 50%; float:left; cursor:pointer;" onclick="loadExample();">
+		<div>
+			<i class="fa fa-file-text-o pull-left" style="font-size:40px;"></i>
+			<strong>Load example data</strong><br /><br />
+			If you never have created a game, this option will prefill a lot of fields with example data, so you can edit it and modify to your needs.
+		</div>
+	</div>
+	
+	<div style="border-left: 1px solid #ddd; width: 48%; float:left; cursor:pointer; padding-left: 10px;" onclick="$('#optionContainer').hide(); $('#gamebuilderContainer').show();">
+		<div>
+			<i class="fa fa-file-o pull-left" style="font-size:40px;"></i>
+			<strong>Start new empty game</strong><br /><br />
+			If you want to create a new game from the scratch, you should use this option
+		</div>
+	</div>
+	
+	<div class="clear"></div>
+	<div  style="border-top: 1px solid #ddd; margin-top:20px; padding-bottom: 20px;"></div>
+	<div style="width: 50%; float:left;">
+		<div >
+			<i class="fa fa-upload pull-left" style="font-size:40px;"></i>
+			<strong>Continue your work</strong><br /><br />
+			Upload your previously created GAMEBUILDER.json file, which is included in your created game-archive and continue with your work.
+		</div>
+	</div>
+	<div style="width: 50%; float:left;">
+		<form class="box" method="post" action="" enctype="multipart/form-data">
+		  <div class="box__input">
+			<input class="box__file" type="file" name="json_file" id="file" data-multiple-caption="{count} files selected" />
+			<label for="file"><strong style="cursor:pointer;">Select GAMEBUILDER.json</strong><span class="box__dragndrop"> or drag it here</span>.</label>
+			<button class="box__button" type="submit" style="display:none;" name="json">Upload</button>
+			<input type="hidden" name="json_plain" id="file_jsonplain" />
+		  </div>
+		</form>
+	</div>
+	<div class="clear"></div>
+	</div>
+	
+	<h2>Your created games</h2>
+	<!-- IF not S_LOGGED_IN -->
+	<div class="infobox infobox-large infobox-blue clearfix">
+			<i class="fa fa-user fa-4x pull-left"></i> Please <a href="https://eqdkp-plus.eu/repository/login">login</a> to see your saved games and continue with your work.
+	</div>
+	<!-- ELSE -->
+	<table class="table fullwidth">
+		  <tr>
+  			<th>Game</th>
+  			<th>Version</th>
+			<th>Last modified</th>
+  		</tr>
+		<!-- BEGIN requirements -->
+	 	<tr>
+			<td><a href="?load={requirements.ID}">{requirements.GAME}</a></td>
+			<td>{requirements.VERSION}</td>
+			<td>{requirements.MODIFIED}</td>
+		</tr>
+	 <!-- END -->
+	</table>
+	
+	
+	<!-- ENDIF -->
+ </div>
+ 
+ 
+ <div class="container theme-showcase" role="main" style="display:none;" id="gamebuilderContainer">
+	<div class="infobox infobox-large infobox-green clearfix">
+			<i class="fa fa-refresh fa-4x pull-left"></i> <strong>Continue your Work!</strong> The created game-archive contains a GAMEBUILDER.json file, which can be uploaded to the Gamebuilder, so you can enhance your game, add additional classes etc.
+	</div>
+ 
+ 
+	<form method="post" onsubmit="return checkRequiredFields()" enctype="multipart/form-data">
+	
+	<fieldset class="settings mediumsettings">
+		<legend>General</legend>
+		<dl>
+			<dt><label>Gameid:</label><br />
+			<span>Use lowercase chars only and no special chars. Good example: wow or eq2</span>
+			</dt>
+			<dd><input type="text" name="name" placeholder="Gamename" onchange="checkGameRepo(this)"><br /><div id="didyoumeancontainer"></div></dd>
+		</dl>
+		<dl>
+			<dt><label>Version:</label><br />
+				<span>Versionnumber of your game, e.g. 1.0.2. You should increase this number when creating a new version.</span>
+			</dt>
+			<dd><input type="text" name="version" placeholder="Version"></dd>
+		</dl>
+		<dl>
+			<dt><label>Language:</label><br />
+				<span>e.g. german or english</span>
+			</dt>
+			<dd><input type="text" name="lang" placeholder="Language"></dd>
+		</dl>		
+	</fieldset>
+	
+	<h2>Classes</h2>
+		<div class="classtype-add-here" style="padding: 10px;">
+		
+		
+		<div class="classtype-template" style="display:none;">
+		 <div class="panel panel-default classtype-container" data-classtypeid="CLASSID" id="classtype_CLASSID">
+            <div class="panel-heading">
+              <h3 class="panel-title"><span>New Classtype</span><i class="fa fa-trash-o fa-lg" style="padding-left: 5px; cursor:pointer;" onclick="removeClassType(this);">&nbsp;</i></h3>
+            </div>
+            <div class="panel-body">
+				<fieldset class="settings mediumsettings">
+					<dl>
+						<dt><label>Classtypename:</label><br />
+						<span>Unique name of the classtype, e.g. class, race, talents1 or talents2 </span>
+						</dt>
+						<dd><input type="text" name="classtype[CLASSID][name]" placeholder="Name" class="form-control classtype-name" onchange="updateClasstitel(this);"></dd>
+					</dl>
+					<dl>
+						<dt><label>Classtype:</label><br />
+						<span>Name of the language Array, e.g. classes, races, talents. One Classtype language Array can be used for multiple classtypes, e.g. "talents" for "talent1" and "talent2".</span>
+						</dt>
+						<dd><input type="text" name="classtype[CLASSID][type]" placeholder="Type" class="form-control"></dd>
+					</dl>
+					
+					<dl>
+						<dt><label>Primary:</label><br />
+						<span>Is this the primary classtype? Primary Classtype is used for many things, e.g. Calendar, and one classtype has to be the Primary one.</span>
+						</dt>
+						<dd><input type="checkbox" name="classtype[CLASSID][primary]" value="CLASSID" class="classtype-primary" onchange="checkUniquePrimary(this)"></dd>
+					</dl>
+					
+					<dl>
+						<dt><label>Admin Setting:</label><br />
+						<span>Check if this setting is a global one the admin has to set</span>
+						</dt>
+						<dd><input type="checkbox" name="classtype[CLASSID][admin]" value="1" class="classtype-admin"></dd>
+					</dl>
+					
+					<dl>
+						<dt><label>Decorate with Icons:</label><br />
+						<span>Should icons be used by this classtype?</span>
+						</dt>
+						<dd><input type="checkbox" name="classtype[CLASSID][decorate]" value="1" class="classtype-decorate"></dd>
+					</dl>
+
+					<dl>
+						<dt><label>Roster:</label><br />
+						<span>Show this classtype on Roster?</span>
+						</dt>
+						<dd><input type="checkbox" name="classtype[CLASSID][roster]" value="1" class="classtype-roster"></dd>
+					</dl>
+					
+					<dl>
+						<dt><label>Recruitment:</label><br />
+						<span>Show this classtype on Recruitment Module?</span>
+						</dt>
+						<dd><input type="checkbox" name="classtype[CLASSID][recruitment]" value="1" class="classtype-recruitment"></dd>
+					</dl>
+					
+					<dl>
+						<dt><label>Parent Classtypes:</label><br />
+						<span></span>
+						</dt>
+						<dd><select class="classtype-parent" class="form-control" name="classtype[CLASSID][parents][]" multiple='multiple' id="ms_parent_CLASSID" onchange="manageParentDDs(this)"></select></dd>
+					</dl>
+				
+				</fieldset>	
+				
+				<table class="table sortable" width="100%">
+					<thead class=".not-sortable">
+						<TR>
+						<th width="40"></th>
+						<th>Name</th>
+						<th>Icon</th>
+						<th>Parents</th>
+						<th>Classcolors</th>
+						</TR>
+					</thead>
+					<tbody class="classtype-classes-container">
+						<tr class="classtype-class-template" style="display:none;">
+							<td><i class="fa fa-arrows fa-lg hand"></i> <i class="fa fa-trash-o fa-lg hand" onclick="removeClass(this); classChangeListener(CLASSID)"></i></td>
+							<td><input type="text" name="classtype[CLASSID][class][CURRENTID][name]" placeholder="Name" style="width: 95%" class="classtype-class" onchange="classChangeListener(CLASSID)"></td>
+							<td><input type="file" name="classtype[CLASSID][class][CURRENTID][file]" class="classtype-icon" onchange="previewImage(this)">
+								<input type="hidden" name="classtype[CLASSID][class][CURRENTID][file_base64]" class="classtype-icon-base64">
+								<img class="uploadPreview" style="max-height: 24px;" src="{EQDKP_ROOT_PATH}images/global/default-image.svg" /> 
+								<button type="button" onclick="deleteImage(this);"><i class="fa fa-trash-o fa-lg"></i></button>
+							</td>
+							<td class="classtype-parents-container" data-currentid="CURRENTID"></td>
+							<td><input type="text" name="classtype[CLASSID][class][CURRENTID][classcolor]" placeholder="Color" class="form-control classtype-classcolor mycolorpicker" size="6"></td>
+						</tr>
+						
+					</tbody>
+				</table>
+				
+				<button type="button" class="add_class_button" onclick="addClass(this); classChangeListener(CLASSID);"><i class="fa fa-plus fa-lg"></i>Add new class</button>
+            </div>
+          </div>
+		
+		
+		</div>
+		</div>
+		<button type="button" onclick="addClassType()"><i class="fa fa-plus"></i>Add new classtype</button>
+		<br /><br />
+		<div class="page-header" id="output">
+			<h1>Roles</h1>
+		</div>
+		<div class="">
+			<table class="table sortable" width="100%">
+					<thead class=".not-sortable">
+						<TR>
+						<th width="40"></th>
+						<th>Name</th>
+						<th>Icon</th>
+						<th>Primary Classes</th>
+						</TR>
+					</thead>
+					<tbody class="roles-container">
+						<tr class="role-template" style="display:none;">
+							<td><i class="fa fa-arrows fa-lg hand"></i> <i class="fa fa-trash-o fa-lg hand" onclick="removeRole(this);"></i></td>
+							<td><input type="text" name="role[name][CURRENTID]" placeholder="Name" style="width: 95%"></td>
+							<td><input type="file" name="role[file][CURRENTID]" class="classtype-icon" onchange="previewImage(this)">
+								<input type="hidden" name="role[file_base64][CURRENTID]" class="classtype-icon-base64">
+								<img class="uploadPreview" style="max-height: 24px;" src="{EQDKP_ROOT_PATH}images/global/default-image.svg" /> 
+								<button type="button" onclick="deleteImage(this);"><i class="fa fa-trash-o fa-lg"></i></button>
+							</td>
+							<td><select name="role[classes][CURRENTID][]" multiple="multiple" class="role-classes"></select></td>
+						</tr>					
+					</tbody>
+				</table>
+				<button type="button" onclick="addRole()"><i class="fa fa-plus"></i>Add new role</button>
+		</div>
+		<br /><br />
+		<div class="page-header" id="output">
+			<h1>Profilefields (optional)</h1>
+		</div>
+		<div class="">
+			<table class="table sortable" width="100%">
+					<thead class=".not-sortable">
+						<TR>
+						<th width="40"></th>
+						<th>Name</th>
+						<th>Type</th>
+						<th>Options</th>
+						</TR>
+					</thead>
+					<tbody class="profilefield-container">
+						<tr class="profilefield-template" style="display:none;">
+							<td><i class="fa fa-arrows fa-lg hand"></i> <i class="fa fa-trash-o fa-lg hand" onclick="removeProfilefield(this);"></i></td>
+							<td><input type="text" name="profilefield[name][CURRENTID]" placeholder="Name" style="width: 95%"></td>
+							<td><select name="profilefield[type][CURRENTID]" class="profilefield-type" onchange="checkProfilefieldOptions(this)"><option value="text" data-form-change="">Text</option><option value="int" data-form-change="">Integer</option><option value="dropdown" data-form-change="">Dropdown</option><option value="link" data-form-change="">Link</option><option value="multiselect" data-form-change="">Multiselect</option><option value="spinner" data-form-change="">Spinner</option><option value="checkbox" data-form-change="">Checkbox</option><option value="radio" data-form-change="">Radio</option><option value="datepicker" data-form-change="">Datepicker</option><option value="imageuploader" data-form-change="">Image</option></select>
+							</td>
+							<td><textarea name="profilefield[options][CURRENTID]" class="profilefield-options" rows="4" style="width:95%; display:none;" placeholder="Each option in one single line"></textarea></td>
+						</tr>					
+					</tbody>
+				</table>
+				<button type="button" onclick="addProfilefield()"><i class="fa fa-plus"></i>Add new profilefield</button>
+		</div>
+				<br /><br />
+		<div class="page-header" id="output">
+			<h1>Events (optional)</h1>
+		</div>
+		<div class="">
+			<table class="table" width="100%">
+					<thead class=".not-sortable">
+						<TR>
+						<th width="40"></th>
+						<th>Name</th>
+						<th>Icon</th>
+						</TR>
+					</thead>
+					<tbody class="event-container">
+						<tr class="event-template" style="display:none;">
+							<td><i class="fa fa-trash-o fa-lg hand" onclick="removeEvent(this);"></i></td>
+							<td><input type="text" name="events[name][CURRENTID]" placeholder="Name" style="width: 95%"></td>
+							
+							<td><input type="file" name="events[file][CURRENTID]" class="classtype-icon" onchange="previewImage(this)">
+								<input type="hidden" name="events[file_base64][CURRENTID]" class="classtype-icon-base64">
+								<img class="uploadPreview" style="max-height: 24px;" src="{EQDKP_ROOT_PATH}images/global/default-image.svg" /> 
+								<button type="button" onclick="deleteImage(this);"><i class="fa fa-trash-o fa-lg"></i></button>
+							</td>
+						</tr>					
+					</tbody>
+				</table>
+				<button type="button" onclick="addEvent()"><i class="fa fa-plus"></i>Add new event</button>
+		</div>
+		<br />
+		<h1>Create Game</h1>
+		<button class="orange" type="submit" name="build"><i class="fa fa-lg fa-check"></i>Submit</button>
+		<input type="text" name="username" class="my username" placeholder="username"/>
+		
+	</form>
+    </div> <!-- /container -->
+	
+	<script>
+		var primary = 0;
+		var classes = 0;
+		var roles = 0;
+		var fields = 0;
+		var eventid = 0;
+		
+		// Return a helper with preserved width of cells
+		var fixHelper = function(e, ui) {
+			ui.children().each(function() {
+				$(this).width($(this).width());
+			});
+			return ui;
+		};
+	
+		function uniqueID(){
+			var uniqueNum = Math.floor( Math.random()*99999 );
+			var uniqueID = String(uniqueNum);
+			return uniqueID;
+		}
+		
+		function checkGameRepo(object){
+			var myvalue = $(object).val();
+			if(myvalue.length > 2){
+				$.post("{SERVERPATH}gamebuilder{SID}", { check_gamename: "1", val: myvalue}, function(data){
+					if(data != ""){
+						$('#didyoumeancontainer').html(data);
+					} else {
+						$('#didyoumeancontainer').html("");
+					}
+				});
+			}
+		}
+	
+		function manageParentDDs(object){
+			var selected = $(object).val();
+			
+			var container = $(object).parent().parent().parent().parent().find('.classtype-parents-container');
+			var classtypeid = $(object).parent().parent().parent().parent().parent().data('classtypeid');
+			
+			$(container).find('.classtype-parents').each( function(){
+				var id = $(this).data('parent-id');
+				if (jQuery.inArray(id, selected) > -1){
+				} else {
+					$(this).parent().remove();
+				}
+			})
+			if (selected != null && selected.length > 0){
+				$.each(selected, function(index, value){
+					var parentName = $("#"+$(object).attr('id') +" option[value='"+value+"']").text();
+					//var options = "<option value='all'>All</option>";
+					var options = "";
+					var classes = getAllClassesFromType(value);
+					jQuery.each(classes, function(index, value){
+						options = options + "<option value='"+index+"'>"+value+"</option>";
+					});
+					var myID = uniqueID();
+					container.append('<span>'+parentName+": <select class='classtype-parents ms_cls_par_"+myID+"' data-parentid="+value+" multiple='multiple' name='classtype["+classtypeid+"][parent][MIAU]["+value+"][]'>"+options+"</select><br /></span>");
+					$('.ms_cls_par_'+myID).multiselect();
+				})
+			}
+			$('.classtype-class-template .ui-multiselect').remove();
+			
+			$(object).parent().parent().parent().parent().find('.classtype-parents-container').each(function(){
+				var currentid = $(this).data('currentid');
+				if (currentid != "CURRENTID"){
+					console.log($(this));
+					console.log($(this).find('.classtype-parents'));
+					$(this).find('.classtype-parents').each(function(){
+						var name = $(this).attr('name');
+						console.log(name);
+						name = name.replace(/MIAU/g, currentid);
+						console.log(name);
+						$(this).attr('name', name);
+					});
+				}
+			})
+		}
+						
+		function getAllClassesFromType(typenumber){
+			var classes = new Array();
+			$('#classtype_'+typenumber).find('.classtype-class').each(function(){
+				if ($(this).val() != "") classes.push($(this).val());
+			});
+			
+			return classes;
+		}
+		
+		function classChangeListener(typeid){
+			var classes = getAllClassesFromType(typeid);
+			$('.classtype-parents').each(function(){
+				var parentid = $(this).data('parentid');
+				var selected = $(this).val();
+				console.log(typeid);
+				console.log(parentid);
+				console.log(classes);
+				if (typeid == parentid){
+					//var options = "<option value='all'>All</option>";
+					var options = "";
+
+					if (classes && classes.length > 0){
+						jQuery.each(classes, function(index, value){
+							options = options + "<option value='"+index+"'>"+value+"</option>";
+						});
+					}
+					$(this).html(options);
+					var classstring = $(this).attr("class");
+					classList = classstring.split(/\s+/);
+					$(this).val(selected);
+					
+					jQuery.each(classList, function(index, value){
+						if (value.substring(0, 7) === "ms_cls_"){
+							$('.'+value).multiselect();
+							$('.'+value).multiselect("destroy");
+							$('.'+value).multiselect();
+						}
+					});
+				}
+			})
+			$('.classtype-class-template .ui-multiselect').remove();
+			
+			
+			if (typeid == primary){
+				initRoles();
+			}
+		}
+	
+	
+		function updateClasstitel(object){
+
+			if (object.value != ""){
+				$(object).parent().parent().parent().parent().parent().find('.panel-title > span').html(object.value);
+			} else {
+				$(object).parent().parent().parent().parent().parent().find('.panel-title > span').html("Unnamed Classtype");
+			}
+			
+			checkUniqueClasstitel();
+			updateParentGeneralDD();
+		}
+		
+		function checkUniqueClasstitel(){
+			var names = new Array();
+			$('.classtype-name').each(function(){
+				names.push($(this).val());
+			})
+			if (names.length != unique(names).length){
+				alert("The Classtype Names have to be unique, so please rename your Classtypes.");
+			}
+		}
+		
+		function unique(array){
+			return array.filter(function(el, index, arr) {
+				return index === arr.indexOf(el);
+			});
+		}
+		
+		function cleanup_json(){
+			$('.classtype-primary').each(function(){
+				if ($(this).prop("checked")){
+					$(this).prop("disabled", false);
+				} else {
+					$(this).prop("disabled", true);
+					hideClasscolors($(this).parent().find('.classtype-primary'));
+				}
+			});
+		}
+		
+		function checkUniquePrimary(object){
+			var count = 0;
+			$('.classtype-primary').each(function(){
+				if ($(this).prop("checked")){
+					count++;
+				}
+			});
+			if (count > 1){
+				alert("You can only have one primary Classtype.");
+				$(object).prop("checked", false);
+				return;
+			} else if(count == 1){
+				$('.classtype-primary').each(function(){
+					if(!$(this).prop("checked")) $(this).prop("disabled", true);
+				});	
+			} else if (count < 1){
+				$('.classtype-primary').each(function(){
+					$(this).prop("disabled", false);
+				});	
+			}
+			
+			if ($(object).prop('checked')){
+				primary = $(object).val();
+				console.log(primary);
+				hideAllClasscolors();
+				showClasscolors(object);
+			} else {
+				primary = 0;
+				hideClasscolors(object);
+			} 
+			
+			initRoles();
+		}
+		
+		function checkUniqueColorize(object){
+			var count = 0;
+			$('.classtype-colorize').each(function(){
+				if ($(this).prop("checked")){
+					count++;
+				}
+			});
+			
+			if (count > 1){
+				alert("Only one classtype can colorize the charnames.");
+				$(object).prop("checked", false);
+				return;
+			} else if(count == 1){
+				$('.classtype-colorize').each(function(){
+					if(!$(this).prop("checked")) $(this).prop("disabled", true);
+				});	
+			} else if (count < 1){
+				$('.classtype-colorize').each(function(){
+					$(this).prop("disabled", false);
+				});	
+			}
+			
+			if (!$(object).prop('checked')){
+				hideClasscolors($(object).parent().find('.classtype-primary'));
+			}
+		}
+		
+		function checkPrimary(object){
+			if ($(object).parent().find('.classtype-primary').prop('checked')){
+				hideAllClasscolors();
+				showClasscolors($(object).parent().find('.classtype-primary'));
+			} else {
+				hideClasscolors($(object).parent().find('.classtype-primary'));
+			}
+			
+		}
+		
+		function updateParentGeneralDD(){
+			var names = new Array();
+			$('.classtype-name').each(function(){
+				classtypeid = $(this).parent().parent().parent().parent().parent().data('classtypeid');
+				names[classtypeid] = $(this).val();
+			})
+			
+			$('.classtype-parent').each(function(){
+				var selected = $(this).val();
+				$(this).html('');
+				var myselect = $(this);
+				var myid = $(this).attr('id');
+				$.each(names, function(index, value){
+					if (value != undefined && value != ""){
+						myselect.append(
+							$('<option></option>').val(index).html(value)
+						);
+					 }
+				})
+				$(this).val(selected);
+				if (myid != "ms_parent_CLASSID") $('#'+myid).multiselect("refresh");
+			})
+		}
+	
+	
+		var classtypecount = 1;
+		
+		function addClassType(){
+			var newType = $('.classtype-template').html();
+			newType = newType.replace(/CLASSID/g, classtypecount);
+			
+			$('.classtype-add-here').append(newType+'<br /><br />');
+			
+			//First Class add Primary Checkbox selected
+			if (classtypecount == 1){
+				$('#classtype_1 .classtype-primary').prop("checked", true).trigger('change');
+				primary = 1;
+			}
+			
+			$('#ms_parent_'+classtypecount).multiselect();
+			$(".sortable tbody").sortable({
+				cancel: 'input, select, .not-sortable, button, .sp-replacer, textarea',
+				cursor: 'pointer',
+				helper: fixHelper,
+			});
+			$(".sortable tbody").sortable("destroy");
+			$(".sortable tbody").sortable({
+				cancel: 'input, select, .not-sortable, button, .sp-replacer, textarea',
+				cursor: 'pointer',
+				helper: fixHelper,
+			});
+			
+			classtypecount++;
+		}
+		
+		function removeClassType(object){
+			$(object).parent().parent().parent().remove();
+			updateParentGeneralDD();
+		}
+		
+		function removeClass(object){
+			$(object).parent().parent().remove();
+		}
+		
+		function removeRole(object){
+			$(object).parent().parent().remove();
+		}
+		
+		function addRole(){
+			$('.role-template .ui-multiselect').remove();
+			var newClass = $('.role-template').html();
+			newClass = newClass.replace(/CURRENTID/g, roles);
+			
+			$('.roles-container').append('<tr>'+newClass+'</tr>');
+			initRoles();
+			roles++;
+		}
+		
+		function removeProfilefield(object){
+			$(object).parent().parent().remove();
+		}
+		
+		function addProfilefield(){
+			var newClass = $('.profilefield-template').html();
+			newClass = newClass.replace(/CURRENTID/g, fields);
+			
+			$('.profilefield-container').append('<tr>'+newClass+'</tr>');
+			initRoles();
+			fields++;
+		}
+		
+		function removeEvent(object){
+			$(object).parent().parent().remove();
+		}
+		
+		function addEvent(){
+			var newClass = $('.event-template').html();
+			newClass = newClass.replace(/CURRENTID/g, eventid);
+			
+			$('.event-container').append('<tr>'+newClass+'</tr>');
+			initRoles();
+			eventid++;
+		}
+		
+		function checkProfilefieldOptions(object){
+			myval = object.value;
+			if(myval == "dropdown" || myval == "multiselect" || myval == "radio" || myval =="checkbox"){
+				$(object).parent().parent().find('.profilefield-options').show();
+			} else {
+				$(object).parent().parent().find('.profilefield-options').hide();
+			}
+		}
+		
+		function initRoles(){
+			var classes = getAllClassesFromType(primary);
+			//var options = "<option value='all'>All</option>";
+			var options = "";
+
+			if (classes && classes.length > 0){
+				jQuery.each(classes, function(index, value){
+					options = options + "<option value='"+index+"'>"+value+"</option>";
+				});
+			}
+			
+			$('.role-classes').each(function(){
+				var selected = $(this).val();
+				$(this).html(options);
+				$(this).val(selected);
+				$('.role-classes').multiselect();
+				$('.role-classes').multiselect("destroy");
+				$('.role-classes').multiselect();
+			})
+		}
+		
+		function addClass(object){
+			var newClass = $(object).parent().find('.classtype-class-template').html();
+			newClass = newClass.replace(/CURRENTID/g, classes);
+			newClass = newClass.replace(/MIAU/g, classes);
+			
+			$(object).parent().find('.classtype-classes-container').append('<tr>'+newClass+'</tr>');
+			
+			//Reset colorpicker
+			$(".mycolorpicker").spectrum("destroy");
+			$(".mycolorpicker").spectrum({showInput: true, preferredFormat: "hex6", allowEmpty:true});
+			$(".classtype-class-template .mycolorpicker").spectrum("destroy");
+			
+			//Check Primary
+			checkPrimary(object);
+			
+			//Reset Parent Multiselects
+			$(object).parent().find('.classtype-parents').each(function(){
+				var classes = $(this).attr("class");
+				classList = classes.split(/\s+/);
+				console.log(classList);
+				jQuery.each(classList, function(index, value){
+					if (value.substring(0, 7) === "ms_cls_"){
+						console.log(value);
+						$('.'+value).multiselect();
+						$('.'+value).multiselect("destroy");
+						$('.'+value).multiselect();
+					}
+				});
+			});
+			classes++;
+			$('.classtype-class-template .ui-multiselect').remove();
+		}
+		
+		$(document).ready(function(){
+			<!-- IF not S_FROM_JSON -->
+			hideAllClasscolors();
+			<!-- ENDIF -->
+			
+			$(".sortable tbody").sortable({
+				cancel: 'input, select, .not-sortable, button, .sp-replacer, textarea',
+				cursor: 'pointer',
+				helper: fixHelper,
+			});
+			
+			
+			//DRag & Drop
+			
+			var isAdvancedUpload = function() {
+			  var div = document.createElement('div');
+			  return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window && 'FileReader' in window;
+			}();
+			
+			var $form = $('.box');
+
+			if (isAdvancedUpload) {
+			  $form.addClass('has-advanced-upload');
+			}
+			
+			$('.box').on('dragover', function(evt){
+			  evt.preventDefault();
+			}).on('dragover dragenter', function() {
+				$form.addClass('is-dragover');
+			  })
+			  .on('dragleave dragend drop', function() {
+				$form.removeClass('is-dragover');
+			  })
+			
+			$('#file').on('change', function(evt){
+				$('.box__button').click();
+			});
+			
+			$('.box').on('drop', function(evt){
+			  evt.preventDefault();
+			  var files = evt.originalEvent.dataTransfer.files;
+			  var myfile = files[0];
+			  
+			  var oFReader = new FileReader();
+			oFReader.readAsText(myfile);
+			oFReader.onload = function (oFREvent) {
+				$('#file_jsonplain').val(oFREvent.target.result);
+				$('.box__button').click();
+			};
+			  
+			});
+			
+		});
+		
+		function previewImage(object) {
+			var oFReader = new FileReader();
+			oFReader.readAsDataURL(object.files[0]);
+
+			oFReader.onload = function (oFREvent) {
+				$(object).parent().find('.uploadPreview').attr('src', oFREvent.target.result);
+			};
+		};
+		
+		function deleteImage(object) {
+			console.log($(object).parent().parent());
+			$(object).parent().find('.uploadPreview').attr('src', '{EQDKP_ROOT_PATH}images/global/default-image.svg');
+			$(object).parent().find('.classtype-icon').val('');
+			$(object).parent().find('.classtype-icon-base64').val('');
+		}
+		
+		function hideClasscolors(object){
+			$(object).parent().parent().parent().parent().parent().find('.sp-replacer').hide();
+		}
+		
+		function hideAllClasscolors(){
+			$('.sp-replacer').hide();
+			
+		}
+		
+		function showClasscolors(object){
+			$(object).parent().parent().parent().parent().parent().find('.sp-replacer').show();
+		}
+		
+		
+		function checkRequiredFields(){
+			if ($('input[name="name"]').val() == ""){
+				$('input[name="name"]').focus();
+				alert("Please enter a Name for your Game, e.g. WoW");
+				return false;
+			}
+			if ($('input[name="version"]').val() == ""){
+				$('input[name="version"]').focus();
+				alert("Please enter a Version for your Game, e.g. 0.1.0");
+				return false;
+			}
+			if ($('input[name="lang"]').val() == ""){
+				$('input[name="lang"]').focus();
+				alert("Please enter a Language for your Game, e.g. english or german");
+				return false;
+			}
+			
+			var count = 0;
+			$('.classtype-primary').each(function(){
+				if ($(this).prop("checked")){
+					count++;
+				}
+			});
+			if (count == 0){
+				alert("You need one Primary Class. Please select one classtype as the primary one.");
+				return false;
+			}
+			return true;
+		}
+		
+		function loadExample(){
+			$('#optionContainer').html("Loading...");
+			
+			$('#optionContainer').hide(); 
+			$('#gamebuilderContainer').show();
+		
+			//General
+			$('input[name="name"]').val('example');
+			$('input[name="version"]').val('0.1.0');
+			$('input[name="lang"]').val('english');
+			
+			//Classes
+			addClassType();
+			$('input[name="classtype[1][name]"]').val('class');
+			$('input[name="classtype[1][type]"]').val('classes');
+			$('input[name="classtype[1][decorate]"]').prop('checked', true);
+			$('input[name="classtype[1][roster]"]').prop('checked', true);
+			$('input[name="classtype[1][recruitment]"]').prop('checked', true);
+			addClass($('#classtype_1').find('.add_class_button'));
+			addClass($('#classtype_1').find('.add_class_button'));
+			addClass($('#classtype_1').find('.add_class_button'));
+			addClass($('#classtype_1').find('.add_class_button'));
+			addClass($('#classtype_1').find('.add_class_button'));
+			$('input[name="classtype[1][class][0][name]"]').val('Hunter');
+			$('input[name="classtype[1][class][0][classcolor]"]').val('#ABD473');
+			$('input[name="classtype[1][class][1][name]"]').val('Mage');
+			$('input[name="classtype[1][class][1][classcolor]"]').val('#69CCF0');
+			$('input[name="classtype[1][class][2][name]"]').val('Paladin');
+			$('input[name="classtype[1][class][2][classcolor]"]').val('#F58CBA');
+			$('input[name="classtype[1][class][3][name]"]').val('Priest');
+			$('input[name="classtype[1][class][3][classcolor]"]').val('#FFFFFF');
+			$('input[name="classtype[1][class][4][name]"]').val('Shaman');
+			$('input[name="classtype[1][class][4][classcolor]"]').val('#0070DE');
+			
+			//Races
+			addClassType();
+			updateParentGeneralDD();
+			$('#ms_parent_2').val(['1']).trigger('change');
+			$('input[name="classtype[2][name]"]').val('race');
+			$('input[name="classtype[2][type]"]').val('races');
+			$('#ms_parent_2').val('1').trigger('change');
+			$('#ms_parent_2').multiselect('destroy');
+			$('#ms_parent_2').multiselect().trigger('change');
+			$('input[name="classtype[2][decorate]"]').prop('checked', true);
+			
+			addClass($('#classtype_2').find('.add_class_button'));
+			addClass($('#classtype_2').find('.add_class_button'));
+			addClass($('#classtype_2').find('.add_class_button'));
+			addClass($('#classtype_2').find('.add_class_button'));
+			$('input[name="classtype[2][class][5][name]"]').val('Human');
+			//classtype[2][parent][5][1][]
+			$('input[name="classtype[2][class][6][name]"]').val('Goblin');
+			//classtype[2][parent][6][1][]
+			$('input[name="classtype[2][class][7][name]"]').val('Gnome');
+			//classtype[2][parent][7][1][]
+			$('input[name="classtype[2][class][8][name]"]').val('Troll');
+			//classtype[2][parent][8][1][]
+			
+			var strClass5 = $('[data-currentid="5"]').find('select').attr('class');
+
+			var array5 = strClass5.split(" ");
+			var class5 = array5[1];
+
+			$('select[name="classtype[2][parent][5][1][]"]').val([0,1]);
+			$('select[name="classtype[2][parent][6][1][]"]').val([1,2]);
+			$('select[name="classtype[2][parent][7][1][]"]').val([2,3]);
+			$('select[name="classtype[2][parent][8][1][]"]').val([3,4]);
+			
+			$('.'+class5).multiselect();
+			$('.'+class5).multiselect("destroy");
+			$('.'+class5).multiselect();
+			
+
+			//Roles
+			addRole();		
+			$('input[name="role[name][0]"]').val('Healer');
+			$('select[name="role[classes][0][]"]').val([2, 3]);
+			addRole();
+			$('input[name="role[name][1]"]').val('Tank');
+			$('select[name="role[classes][1][]"]').val([2]);
+			addRole();
+			$('input[name="role[name][2]"]').val('Range-DD');
+			$('select[name="role[classes][2][]"]').val([0, 1, 3, 4]);
+			addRole();
+			$('input[name="role[name][3]"]').val('Melee');
+			$('select[name="role[classes][3][]"]').val([0, 2]);
+			
+			$('.role-classes').multiselect();
+			$('.role-classes').multiselect("destroy");
+			$('.role-classes').multiselect();
+			
+			//Profilefields
+			addProfilefield();
+			$('input[name="profilefield[name][0]"]').val('Level');
+			$('select[name="profilefield[type][0]"]').val('spinner');
+			
+			addProfilefield();
+			diva = "Enchanting|Engineering|Jewelcrafting|Leatherworking";
+			diva = diva.split('|').join('\n');
+
+			$('input[name="profilefield[name][1]"]').val('Profession');
+			$('select[name="profilefield[type][1]"]').val('dropdown');
+			$('select[name="profilefield[type][1]"]').trigger('change');
+			$('textarea[name="profilefield[options][1]"]').val(diva);
+		}
+		
+	</script>
+	
+	<style>
+		.my.username {
+			display:none;
+		}
+		.panel {
+			border: 1px solid #ddd;
+			border-radius: 4px;		
+		}
+		
+		.panel-heading {
+			background-image: linear-gradient(to bottom, #f5f5f5 0px, #e8e8e8 100%);
+    		background-repeat: repeat-x;
+    		
+    		background-color: #f5f5f5;
+    		border-color: #ddd;
+    		color: #333;
+
+    		border-top-left-radius: 3px;
+    		border-top-right-radius: 3px;
+   			padding: 10px 15px;
+		}
+		
+		.panel-body {
+			background-color: #fff;
+			padding: 10px 15px;
+		}
+		
+		.box__dragndrop,
+		.box__uploading,
+		.box__success,
+		.box__error {
+		  display: none;
+		}
+		
+		.box.has-advanced-upload {
+		  outline: 2px dashed #ddd;
+		  outline-offset: 0px;
+		  padding: 5px;
+		  height: 50px;
+		}
+		
+		.box.is-dragover {
+			background: #ddd;
+		}
+		.box.has-advanced-upload .box__dragndrop {
+		  display: inline;
+		}
+		
+		.box__file {
+			width: 0.1px;
+			height: 0.1px;
+			opacity: 0;
+			overflow: hidden;
+			position: absolute;
+			z-index: -1;
+		}
+
+	</style>
