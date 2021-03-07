@@ -17,3 +17,4 @@ Pageobject for EQdkp Plus, which allows creating the basic structure of games us
 			'gamebuilder' 	=> 'gamebuilder',
 		);
 ```
+* Replace our URls, e.g. in <https://github.com/EQdkpPlus/misc-gamebuilder/blob/main/gamebuilder_pageobject.class.php#L49>, with your URL of the Gamebuilder
